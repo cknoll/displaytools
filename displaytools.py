@@ -26,6 +26,8 @@ the content of `my_random_variable`. It saves the typing effort and the code
 duplication of manually adding `display(my_random_variable)`.
 """
 
+# todo use sp.Eq(sp.Symbol('Z1'), theta, evaluate=False) to get better formatting
+
 
 import new
 
@@ -47,11 +49,19 @@ def insert_disp_lines(raw_cell):
             #!! try ... eval(...) except SyntaxError
             new_line = 'display(%s); print("---")' % var_str
             lines.insert(i+1, new_line)
+        
+        # also allow to display the return value (without assignment)
+        elif line.endswith(special_comment) and not line[0] in [' ', '#']:
+            if not line.index('#') == line.index('##'):
+                continue
+            
+            idx = line.index('##')
+            lines[i] = 'display(%s); print("___")' % line[:idx]
+            
 
     new_raw_cell = "\n".join(lines)
 
     return new_raw_cell
-
 
 
 def load_ipython_extension(ip):
