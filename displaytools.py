@@ -33,8 +33,68 @@ import new
 
 from IPython.display import display
 
-special_comment = '##'
-special_comment_lhs = '##:'
+class Container(object):
+    pass
+
+# special comments
+sc = '##'
+sc_lhs = '##:'
+sc_transpose = '##T'
+sc_lhs_transpose = '##:T'
+
+sc_list = [sc, sc_lhs, sc_transpose, sc_lhs_transpose]
+
+# ensure that all special comments have the same start string
+for elt in sc_list:
+    assert elt.startswith(sc)
+
+def eval_line_end(line):
+    res = Container()
+    res.sc = False
+    res.lhs = False
+    res.transpose = False
+    res.simplify = False
+    res.assignment = False
+
+    if line.endswith(sc):
+        res.sc = True
+
+    elif line.endswith(sc_lhs):
+        res.sc = True
+        res.lhs = True
+
+    # Transposition assumes that sympy or numpy is imported
+    elif line.endswith(sc_transpose):
+        res.sc = True
+        res.transpose = True
+
+    elif line.endswith(sc_lhs_transpose):
+        res.sc = True
+        res.lhs = True
+        res.transpose = True
+
+    return res
+
+
+def process_line(line, line_flags, disp_str):
+
+    if line_flags.assignment:
+        delim = "---"
+    else:
+        delim = "___"
+
+     #!! try ... eval(...) except SyntaxError ?
+    if line_flags.simplify:
+        disp_str += '.smplf'
+    if line_flags.transpose:
+        disp_str += '.T'
+    if line_flags.lhs:
+        new_line = 'custom_display("%s", %s); print("%s")' % (disp_str, disp_str, delim)
+    else:
+        new_line = 'display(%s); print("%s")' % (disp_str, delim)
+
+    return new_line
+
 
 def insert_disp_lines(raw_cell):
     lines = raw_cell.split('\n')
@@ -43,41 +103,46 @@ def insert_disp_lines(raw_cell):
     # iterate from behind -> insert does not change the lower indices
     for i in xrange(N-1, -1, -1):
         line = lines[i]
-        if line.endswith(special_comment) and line.count(' = ') == 1 and not line[0] in [' ', '#']:
-            idx = line.index(' = ')
-            var_str = line[:idx].strip()
+        line_flags = eval_line_end(line)
 
-            #!! try ... eval(...) except SyntaxError
-            new_line = 'display(%s); print("---")' % var_str
-            lines.insert(i+1, new_line)
-        
-        # also allow to display the return value (without assignment)
-        elif line.endswith(special_comment) and not line[0] in [' ', '#']:
-            if not line.index('#') == line.index('##'):
+        if line_flags.sc:
+            if line[0] in [' ', '#']:
+                # this line is part of a comment or indented block
+                # -> ignore
                 continue
-            
-            idx = line.index('##')
-            lines[i] = 'display(%s); print("___")' % line[:idx]
-            
-        elif line.endswith(special_comment_lhs) and line.count(' = ') == 1 and not line[0] in [' ', '#']:
-            idx = line.index(' = ')
-            var_str = line[:idx].strip()
 
-            new_line = 'custom_display("%s", %s); print("---")' % (var_str, var_str)
-            lines.insert(i+1, new_line)
-            
-            
+            if not line.index('#') == line.index(sc):
+                # the special comment might not be the first comment
+                # -> ignore this line
+                continue
+
+            if ' = ' in line:
+                idx = line.index(' = ')
+                var_str = line[:idx].strip()
+                line_flags.assignment = True
+                new_line = process_line(line, line_flags, var_str)
+                lines.insert(i+1, new_line)
+            else:
+                # this line is not an assignment
+                # -> it is replaced by `display(line)`
+                idx = line.index(sc)
+                disp_str = line[:idx]
+                line_flags.assignment = False
+                new_line = process_line(line, line_flags, disp_str)
+                lines[i] = new_line
 
     new_raw_cell = "\n".join(lines)
 
     return new_raw_cell
+
 
 def custom_display(lhs, rhs):
     """
     lhs: left hand side
     rhs: right hand side
     
-    This function serves to inject the string for the left hand
+    This function serves to inject the string for the left hand side
+    of an assignment
     """
     
     # This code is mainly copied from IPython/display.py
