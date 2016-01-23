@@ -53,7 +53,6 @@ def eval_line_end(line):
     res.sc = False
     res.lhs = False
     res.transpose = False
-    res.simplify = False
     res.assignment = False
 
     if line.endswith(sc):
@@ -80,13 +79,14 @@ def process_line(line, line_flags, disp_str):
 
     if line_flags.assignment:
         delim = "---"
+        brace_str = "%s"
     else:
         delim = "___"
+        brace_str = "(%s)"
 
      #!! try ... eval(...) except SyntaxError ?
-    if line_flags.simplify:
-        disp_str += '.smplf'
     if line_flags.transpose:
+        disp_str = brace_str % disp_str
         disp_str += '.T'
     if line_flags.lhs:
         new_line = 'custom_display("%s", %s); print("%s")' % (disp_str, disp_str, delim)
