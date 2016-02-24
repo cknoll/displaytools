@@ -31,7 +31,9 @@ duplication of manually adding `display(my_random_variable)`.
 
 import new
 
+import IPython
 from IPython.display import display
+
 
 class Container(object):
     pass
@@ -179,7 +181,14 @@ def custom_display(lhs, rhs):
         else:
             # this happens e.g. for mime-type (i.e. key) 'image/png'
             new_format_dict = format_dict
-    publish_display_data('display', new_format_dict, md_dict)
+            
+    # legacy IPython 2.x support
+    if IPython.__version__.startswith('2.'):
+        publish_display_data('display', new_format_dict, md_dict)
+    else:
+        # indeed, I dont know with which version the api changed
+        # but it does not really matter (for me)
+        publish_display_data(data=new_format_dict, metadata=md_dict)
 
 
 def load_ipython_extension(ip):
