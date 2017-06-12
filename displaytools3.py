@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Issues: SyntaxError points to the wrong line (due to display insertion)
-# Note: this extension does not work properly with keywordargs: x = func(a, b=2)
-
 
 """
 This module was written by Carsten Knoll, see 
 
 https://github.com/cknoll/displaytools
 
-As I have no idea which licence I should choose this code is licenced under GPLv3
-see
+This code is licensed under GPLv3
+
 
 https://www.gnu.org/licenses/gpl-3.0.en.html
 
@@ -25,7 +22,7 @@ Background: insert some logic to display the 'result' of an assignment
 
 # load it with %reload_ext displaytools
 
- usage:
+usage:
  
 `my_random_variable =  np.random.rand() ##`
 
@@ -36,6 +33,10 @@ That way, the notebook is more comprehensible beacause the reader knows
 the content of `my_random_variable`. It saves the typing effort and the code
 duplication of manually adding `display(my_random_variable)`.
 """
+
+# Issues: SyntaxError points to the wrong line (due to display insertion)
+# Note: this extension does not work properly with keywordargs: x = func(a, b=2)
+
 
 # todo maybe use sp.Eq(sp.Symbol('Z1'), theta, evaluate=False) to get better formatting
 
@@ -216,8 +217,11 @@ def load_ipython_extension(ip):
             print(raw_cell)
             print("new_cell:")
             print(new_raw_cell)
+            print('-'*5)
+            print("args", args)
+            print("kwargs", kwargs)
 
-        ip.old_run_cell(new_raw_cell, *args, **kwargs)
+        return ip.old_run_cell(new_raw_cell, *args, **kwargs)
 
     # prevent unwanted overwriting when the extension is reloaded
     if not 'new_run_cell' in str(ip.run_cell):
