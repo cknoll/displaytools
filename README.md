@@ -15,7 +15,7 @@ in the same directory as the notebook where it shall be included.
 ---
 
 ## Example:
-See this [IPython notebook](http://nbviewer.ipython.org/github/cknoll/displaytools/blob/master/example1.ipynb)
+See this [IPython notebook](http://nbviewer.ipython.org/github/cknoll/displaytools/blob/master/example1_python3.ipynb)
 
 ---
 
