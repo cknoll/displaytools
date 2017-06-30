@@ -129,8 +129,11 @@ def insert_disp_lines(raw_cell):
 
             if not line.index('#') == line.index(sc):
                 # the special comment might not be the first comment
-                # -> ignore this line
-                continue
+                # -> ignore this line?
+                # continue
+                
+                # new option: not an important special case
+                pass
 
             if ' = ' in line:
                 idx = line.index(' = ')
