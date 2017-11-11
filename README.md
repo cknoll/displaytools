@@ -1,3 +1,29 @@
+# IMPORTANT NOTICE:
+This repo is obsolete. Its content is now developed as part of [ipydex](https://github.com/cknoll/ipydex).
+
+This repo will be deleted soon (Jan. 2018).
+
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+
+
+
+
+
+
 # displaytools
 
 This module is an experimental extension for IPython Notebook.
